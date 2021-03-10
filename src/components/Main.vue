@@ -68,7 +68,7 @@
             this.query = null; //clear query input
             console.log('before: ', res.articles);
 
-            var articles = this.sortArticles(res.articles);
+            var articles = this.sortArticles(res.articles, this.isAscending);
 
             this.searchResults = articles;
             this.total = res.totalResults;
