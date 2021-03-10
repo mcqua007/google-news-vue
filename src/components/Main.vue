@@ -13,7 +13,7 @@
       </button>
     </div>
     <Results @open="openImgModal" :results="searchResults"></Results>
-    <div class="modal" @click="closeModal()" v-show="modalImg">
+    <div class="modal" @click="closeModal()" v-if="modalImg">
       <img :src="modalImg" />
     </div>
   </div>
@@ -106,7 +106,6 @@
     width: 100%;
     height: 100%;
     background: #000000b3;
-    opacity: 0;
   }
   .modal img {
     max-width: calc(100vw - 20px);
