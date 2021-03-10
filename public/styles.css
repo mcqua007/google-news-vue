@@ -1,5 +1,4 @@
 body{
-    width: 100%;
     padding: 0 10px;
     overflow-x: hidden;
 }
@@ -10,5 +9,5 @@ body{
     outline:none;
 }
 button{
-    cursor:pointer;
+    cursor:pointer
 }
