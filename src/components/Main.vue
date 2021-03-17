@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h2>{{ title }}</h2>
-    <form class="search-form" v-on:submit="getSearchResults($event)">
+    <form class="search-form" v-on:submit="submitSearchForm($event)">
       <input type="text" v-model="query" placeholder="Search news..." required />
       <button type="submit">Search</button>
     </form>
@@ -13,6 +13,26 @@
       </button>
     </div>
     <Results @open="openImgModal" :results="searchResults"></Results>
+    <div
+      v-show="searchResults"
+      class="pagination"
+      style="width: 100%; display:flex; align-items: center; max-width: 300px; margin: 10px auto;"
+    >
+      <button @click="goPage(currentPage - 1)" :disabled="currentPage === 1"><i class="la la-angle-left"></i></button>
+      <ul class="pagination_page-list">
+        <li
+          v-for="(page, index) in pagesInView"
+          :key="index"
+          :class="{ 'active': page === currentPage }"
+          @click="goPage(page)"
+        >
+          {{ page }}
+        </li>
+      </ul>
+      <button @click="goPage(currentPage + 1)" :disabled="currentPage === totalPages">
+        <i class="la la-angle-right"></i>
+      </button>
+    </div>
     <div class="modal" @click="closeModal()" v-if="modalImg">
       <img :src="modalImg" />
     </div>
@@ -34,7 +54,13 @@
         searchResults: null,
         total: null,
         isAscending: true,
-        modalImg: null
+        modalImg: null,
+        currentPage: null,
+        totalPages: null,
+        pagesInView: [],
+        maxRange: 7,
+        apiMaxResults: 100,
+        apiPageSize: 10
       };
     },
     computed: {
@@ -43,6 +69,23 @@
       }
     },
     methods: {
+      nextPage() {},
+      prevPage() {},
+      goPage(page) {
+        page = page > 1 ? page : 1;
+        this.getSearchResults(page);
+      },
+      pageRange() {
+        // this.maxPagesInView = this.maxPagesInView > this.totalPages ? this.totalPages : this.maxPagesInView;
+        this.maxRange = this.maxRange > this.totalPages ? this.totalPages : this.maxRange;
+        var num = this.currentPage;
+        if (num + this.maxRange <= this.totalPages + 1) {
+          this.pagesInView = [];
+          for (var i = 1; i <= this.maxRange; i++) {
+            this.pagesInView.push(num++);
+          }
+        }
+      },
       closeModal() {
         this.modalImg = null;
       },
@@ -60,18 +103,25 @@
           return [...arr].sort((a, b) => (a.title < b.title ? 1 : -1));
         }
       },
-      getSearchResults(e) {
+      submitSearchForm(e) {
         e.preventDefault();
-        const url = `https://newsapi.org/v2/everything?q=${this.query}&apiKey=${this.key}`;
+        this.getSearchResults(1);
+      },
+      getSearchResults(page = 1) {
+        const url = `https://newsapi.org/v2/everything?q=${this.query}&apiKey=${this.key}&pageSize=${this.apiPageSize}&page=${page}`;
         if (this.query) {
           this.get(url).then(res => {
-            this.query = null; //clear query input
-            console.log('before: ', res.articles);
+            console.log('api res: ', res);
 
-            var articles = this.sortArticles(res.articles, this.isAscending);
-
+            //this.totalPages = Math.round(res.totalResults / apiPageSize);  //limited to 100 results because dev version;
+            this.total = res.totalResults <= 100 ? res.totalResults : 100; //because api limit
+            this.totalPages = Math.round(this.total / this.apiPageSize);
+            this.currentPage = page;
+            let articles = this.sortArticles(res.articles, this.isAscending);
             this.searchResults = articles;
-            this.total = res.totalResults;
+            //this.query = null; //clear query input
+
+            this.pageRange();
           });
         } else {
           alert('Must input a query!');
@@ -95,6 +145,22 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  ul.pagination_page-list {
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+    margin: 0 10px;
+    overflow-x: hidden;
+    list-style-type: none;
+    padding-inline-start: 0;
+  }
+  ul.pagination_page-list li {
+    display: grid;
+    cursor: pointer;
+  }
+  ul.pagination_page-list li.active {
+    font-weight: 600;
+  }
   .modal {
     display: flex;
     justify-content: center;
@@ -108,7 +174,13 @@
     background: #000000b3;
   }
   .modal img {
-    max-width: calc(100vw - 20px);
+    max-width: 50vw;
+  }
+
+  @media (max-width: 768px) {
+    .modal img {
+      max-width: calc(100vw - 20px);
+    }
   }
 
   .modal-close-btn {
