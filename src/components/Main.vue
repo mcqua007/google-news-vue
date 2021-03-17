@@ -60,7 +60,13 @@
         pagesInView: [],
         maxRange: 7,
         apiMaxResults: 100,
-        apiPageSize: 10
+        apiPageSize: 10,
+        nytKey: 'vA1At5otQZ7AQGS3QupEWq4DZeBGBbrO',
+        nytImgPrefix: 'http://static01.nyt.com',
+        nytArticleURL:
+          'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=[QUERY]&page=[PAGE]&api-key=[API-KEY]',
+        nytMovieReviewURL:
+          'https://api.nytimes.com/svc/movies/v2/reviews/search.json?query=godfather&api-key=vA1At5otQZ7AQGS3QupEWq4DZeBGBbrO'
       };
     },
     computed: {
@@ -69,8 +75,6 @@
       }
     },
     methods: {
-      nextPage() {},
-      prevPage() {},
       goPage(page) {
         page = page > 1 ? page : 1;
         this.getSearchResults(page);
