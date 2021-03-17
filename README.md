@@ -1,4 +1,3 @@
-# leafgroup-news
 
 ## Project setup
 ```
